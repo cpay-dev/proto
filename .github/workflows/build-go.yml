@@ -1,0 +1,225 @@
+name: sync Go
+
+on:
+  push:
+    branches: [ automation ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  PROTOC_VERSION: "32.0"
+  PROTOC_BIN_VERSION: "v1.36.8"
+  GRPC_BIN_VERSION: "v1.5.1"
+  GOBIN: "${{ github.workspace }}/.cache/go-tools/bin"
+
+jobs:
+  codegen:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        os: [ macos-15, ubuntu-24.04, ubuntu-24.04-arm ]
+        go-version: [ '1.25.1' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Compute protoc archive name
+        id: protoc-arch
+        run: |
+          set -eu
+          V="${PROTOC_VERSION}"
+          OS="${{ runner.os }}"
+          ARCH="${{ runner.arch }}"
+
+          case "$OS" in
+            Linux)  OS_ID="linux" ;;
+            macOS)  OS_ID="osx" ;;
+            *) echo "Unsupported OS: $OS" >&2; exit 1 ;;
+          esac
+
+          case "$ARCH" in
+            X64)   CPU_ID="x86_64" ;;
+            ARM64) CPU_ID="aarch_64" ;;
+            *) echo "Unsupported arch: $ARCH" >&2; exit 1 ;;
+          esac
+
+          FILE="protoc-${V}-${OS_ID}-${CPU_ID}.zip"
+          TAG="v${V}"
+
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"   >> "$GITHUB_OUTPUT"
+
+      - name: Restore protoc cache
+        id: protoc-cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.protoc
+          key: protoc-${{ steps.protoc-arch.outputs.tag }}-${{ steps.protoc-arch.outputs.file }}-${{ runner.os }}
+
+      - name: Install protoc ${{ env.PROTOC_VERSION }}
+        if: steps.protoc-cache.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          mkdir -p "$HOME/.protoc"
+          FILE="${{ steps.protoc-arch.outputs.file }}"
+          TAG="${{ steps.protoc-arch.outputs.tag }}"
+          URL="https://github.com/protocolbuffers/protobuf/releases/download/${TAG}/${FILE}"
+          echo "Downloading $URL"
+          curl -sSfL -o "$FILE" "$URL"
+          unzip -o "$FILE" -d "$HOME/.protoc"
+          rm -f "$FILE"
+          echo "$HOME/.protoc/bin" >> "$GITHUB_PATH"
+          echo "PROTOC_INCLUDE=$HOME/.protoc/include" >> "$GITHUB_ENV"
+
+      - name: Add protoc to PATH and env (cache hit)
+        if: steps.protoc-cache.outputs.cache-hit == 'true'
+        run: |
+          echo "$HOME/.protoc/bin" >> "$GITHUB_PATH"
+          echo "PROTOC_INCLUDE=$HOME/.protoc/include" >> "$GITHUB_ENV"
+
+      - name: Verify protoc
+        run: |
+          set -eux
+          protoc --version
+          test -d "$PROTOC_INCLUDE"
+
+      - name: Cache Go toolchain
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ runner.tool_cache }}/go/${{ matrix.go-version }}
+          key: go-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ matrix.go-version }}
+
+      - name: Setup go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache: false
+
+      - name: Point go bin to the cache dir
+        run: |
+          set -eux
+          mkdir -p "$GOBIN"
+          echo "$GOBIN" >> "$GITHUB_PATH"
+
+      - name: Cache go binaries
+        id: cache-go-bin
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ env.GOBIN }}
+          key: ${{ runner.os }}-${{ runner.arch }}-go-${{ matrix.go-version }}-${{ env.PROTOC_BIN_VERSION }}-${{ env.GRPC_BIN_VERSION }}
+
+      - name: Install go binaries (cache miss)
+        if: steps.cache-go-bin.outputs.cache-hit != 'true'
+        run: |
+          set -eux
+          go install "google.golang.org/protobuf/cmd/protoc-gen-go@${{ env.PROTOC_BIN_VERSION }}"
+          go install "google.golang.org/grpc/cmd/protoc-gen-go-grpc@${{ env.GRPC_BIN_VERSION }}"
+
+      - name: Verify go binaries
+        run: |
+          set -eux
+          protoc-gen-go --version
+          protoc-gen-go-grpc --version
+
+      - name: Build sources
+        run: |
+          set -eux
+          mkdir build
+          find src -type f -name '*.proto' \
+          -exec protoc \
+          -I src \
+          --go_out=./build \
+          --go_opt=paths=source_relative \
+          --go-grpc_out=./build \
+          --go-grpc_opt=paths=source_relative {} \;
+
+      - name: Checkout proto-go
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          token: ${{ secrets.PROTO_GO_PUB_WRITE_TOKEN }}
+          repository: 'cpay-dev/proto-go'
+          path: 'proto-go'
+
+      - name: Sync sources
+        run: |
+          set -eux
+          test -d build || { echo "build dir not found"; exit 1; }
+          find 'proto-go' -mindepth 1 -maxdepth 1 \
+            ! -name 'go.mod' \
+            ! -name 'go.sum' \
+            ! -name '.*' \
+            -exec rm -rf {} +
+          cp -r ./build/* proto-go/
+
+      - name: Validate go library builds
+        working-directory: 'proto-go'
+        run: |
+          set -eux
+          go mod tidy
+          go mod verify
+          mkdir -p cmd/unit
+          cat <<EOF > cmd/unit/main.go
+          package main
+          
+          import "github.com/cpay-dev/proto-go/blockchain/v1"
+          
+          func main() {
+            println("chain:", v1.Chain_CHAIN_ANY_EVM)
+          }
+          EOF
+          go build cmd/unit/main.go \
+            && ./main \
+            && rm ./main \
+            && rm -r cmd
+
+
+      - name: Install SSH signing key
+        if: ${{ matrix.os == 'macos-15' }}
+        env:
+          SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "${SIGNING_KEY}" > "$HOME/.ssh/github-signing"
+          chmod 600 "$HOME/.ssh/github-signing"
+
+      - name: Commit and push to proto-go
+        if: ${{ matrix.os == 'macos-15' }}
+        working-directory: 'proto-go'
+        env:
+          REV: ${{ github.sha }}
+          BRANCH: "sync/${{ github.sha }}"
+          GH_TOKEN: ${{ secrets.PROTO_GO_PUB_WRITE_TOKEN }}
+        run: |
+          set -eux
+          git config user.name "cpay.dev[bot]"
+          git config user.email "203521523+cpay-dev-git@users.noreply.github.com"
+          git config gpg.format ssh
+          git config user.signingkey "$HOME/.ssh/github-signing"
+          git config commit.gpgsign true
+          git checkout -B "$BRANCH"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -S -m "sync Go with ${{ github.ref_name }}"
+          git push -u origin "$BRANCH"
+
+      - name: Open PR
+        if: ${{ matrix.os == 'macos-15' }}
+        working-directory: 'proto-go'
+        env:
+          REV: ${{ github.sha }}
+          BRANCH: "sync/${{ github.sha }}"
+          GH_TOKEN: ${{ secrets.PROTO_GO_PUB_WRITE_TOKEN }}
+        run: |
+          set -eux
+          gh pr create \
+            --base "automation" \
+            --head "$BRANCH" \
+            --title "Sync Go with ${{ github.ref_name }}" \
+            --body "[Source commit](https://github.com/cpay-dev/proto/commit/$REV)"
