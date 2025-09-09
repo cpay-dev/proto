@@ -1,10 +1,11 @@
 syntax = "proto3";
 
-package cpay.blockchain.v1;
+package cpay.api.v1.merchant;
 
-option go_package = "github.com/cpay-dev/proto-go/blockchain/v1";
+option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
 
-import "blockchain/v1/asset.proto";
+import "api/v1/blockchain/asset.proto";
+import "api/v1/blockchain/chain.proto";
 import "blockchain/v1/chain.proto";
 
 service MerchantService {
@@ -16,13 +17,13 @@ message ListChainsRequest {
 }
 
 message ListChainsResponse {
-  repeated Chain chains = 1;
+  repeated blockchain.Chain chains = 1;
 }
 
 message ListAssetsRequest {
-  Chain chain = 1;
+  cpay.blockchain.v1.Chain chain = 1;
 }
 
 message ListAssetsResponse {
-  repeated Asset assets = 1;
+  repeated blockchain.Asset assets = 1;
 }
