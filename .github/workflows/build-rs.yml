@@ -134,7 +134,7 @@ jobs:
             echo "No changes to commit"
             exit 0
           fi
-          git commit -S -m "sync Rust with ${{ github.ref_name }}"
+          git commit -S -m "sync with ${{ github.ref_name }}"
           git push -u origin "$BRANCH"
 
       - name: Open PR
@@ -149,5 +149,5 @@ jobs:
           gh pr create \
             --base "automation" \
             --head "$BRANCH" \
-            --title "Sync Rust with ${{ github.ref_name }}" \
+            --title "Sync with ${{ github.ref_name }}" \
             --body "[Source commit](https://github.com/cpay-dev/proto/commit/$REV)"
