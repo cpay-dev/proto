@@ -23,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Checkout proto-ts
+      - name: Checkout proto-rs
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           token: ${{ secrets.PROTO_RS_PUB_WRITE_TOKEN }}
@@ -147,7 +147,7 @@ jobs:
         run: |
           set -eux
           gh pr create \
-            --base "autobuild" \
+            --base "automation" \
             --head "$BRANCH" \
-            --title "Sync Typescript with ${{ github.ref_name }}" \
+            --title "Sync Rust with ${{ github.ref_name }}" \
             --body "[Source commit](https://github.com/cpay-dev/proto/commit/$REV)"
