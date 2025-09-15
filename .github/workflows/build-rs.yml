@@ -96,13 +96,13 @@ jobs:
           set -eux
           find crates/proto/src -type f ! -name 'lib.rs' -delete
           export PROTO_SRC_DIR="${{ github.workspace }}/src"
-          cargo run proto-build
+          cargo r -p proto-build
 
       - name: Validate proto
         working-directory: 'proto-rs'
         run: |
           set -eux
-          cargo build cpay-proto
+          cargo b -p cpay-proto
       
       - name: Install SSH signing key
         if: ${{ matrix.os == 'macos-15' }}
