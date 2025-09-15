@@ -94,5 +94,60 @@ jobs:
         working-directory: 'proto-rs'
         run: |
           set -eux
+          find crates/proto/src -type f ! -name 'lib.rs' -delete
           export PROTO_SRC_DIR="${{ github.workspace }}/src"
           cargo run proto-build
+
+      - name: Validate proto
+        working-directory: 'proto-rs'
+        run: |
+          set -eux
+          cargo build cpay-proto
+      
+      - name: Install SSH signing key
+        if: ${{ matrix.os == 'macos-15' }}
+        env:
+          SIGNING_KEY: ${{ secrets.SSH_SIGNING_KEY }}
+        run: |
+          set -eux
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "${SIGNING_KEY}" > "$HOME/.ssh/github-signing"
+          chmod 600 "$HOME/.ssh/github-signing"
+
+      - name: Commit and push to proto-rs
+        if: ${{ matrix.os == 'macos-15' }}
+        working-directory: 'proto-rs'
+        env:
+          REV: ${{ github.sha }}
+          BRANCH: "sync/${{ github.sha }}"
+          GH_TOKEN: ${{ secrets.PROTO_RS_PUB_WRITE_TOKEN }}
+        run: |
+          set -eux
+          git config user.name "cpay.dev[bot]"
+          git config user.email "203521523+cpay-dev-git@users.noreply.github.com"
+          git config gpg.format ssh
+          git config user.signingkey "$HOME/.ssh/github-signing"
+          git config commit.gpgsign true
+          git checkout -B "$BRANCH"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -S -m "sync Rust with ${{ github.ref_name }}"
+          git push -u origin "$BRANCH"
+
+      - name: Open PR
+        if: ${{ matrix.os == 'macos-15' }}
+        working-directory: 'proto-rs'
+        env:
+          REV: ${{ github.sha }}
+          BRANCH: "sync/${{ github.sha }}"
+          GH_TOKEN: ${{ secrets.PROTO_RS_PUB_WRITE_TOKEN }}
+        run: |
+          set -eux
+          gh pr create \
+            --base "autobuild" \
+            --head "$BRANCH" \
+            --title "Sync Typescript with ${{ github.ref_name }}" \
+            --body "[Source commit](https://github.com/cpay-dev/proto/commit/$REV)"
