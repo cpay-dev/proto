@@ -30,7 +30,7 @@ jobs:
           repository: 'cpay-dev/proto-rs'
           path: 'proto-rs'
 
-            - name: Compute protoc archive name
+      - name: Compute protoc archive name
         id: protoc-arch
         run: |
           set -eu
