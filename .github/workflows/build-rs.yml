@@ -31,6 +31,5 @@ jobs:
         working-directory: 'proto-rs'
         run: |
           set -eux
-          PROTO_SRC_DIR="${{ github.workspace }}/src"
-          echo "PROTO_SRC_DIR=$PROTO_SRC_DIR"
+          export PROTO_SRC_DIR="${{ github.workspace }}/src"
           cargo run proto-build
