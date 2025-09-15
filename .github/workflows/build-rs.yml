@@ -1,0 +1,36 @@
+name: sync Rust
+
+on:
+  push:
+    branches: [ automation ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  codegen:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        os: [ macos-15, ubuntu-24.04, ubuntu-24.04-arm ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Checkout proto-ts
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          token: ${{ secrets.PROTO_RS_PUB_WRITE_TOKEN }}
+          repository: 'cpay-dev/proto-rs'
+          path: 'proto-rs'
+
+      - name: Compile proto
+        working-directory: 'proto-rs'
+        run: |
+          set -eux
+          PROTO_SRC_DIR="${{ github.workspace }}/src"
+          echo "PROTO_SRC_DIR=$PROTO_SRC_DIR"
+          cargo run proto-build
