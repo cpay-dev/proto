@@ -4,11 +4,11 @@ package cpay.api.v1.blockchain;
 
 option go_package = "github.com/cpay-dev/proto-go/api/v1/blockchain";
 
-import "blockchain/v1/chain.proto";
+import "api/v1/blockchain/chain.proto";
 
 message Asset {
   string id = 1;
-  cpay.blockchain.v1.Chain chain = 2;
+  ChainID chain = 2;
   string name = 3;
   string symbol = 4;
   AssetMetadata metadata = 5;

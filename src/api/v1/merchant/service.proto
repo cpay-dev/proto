@@ -6,7 +6,6 @@ option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
 
 import "api/v1/blockchain/asset.proto";
 import "api/v1/blockchain/chain.proto";
-import "blockchain/v1/chain.proto";
 
 service MerchantService {
   rpc ListChains(ListChainsRequest) returns (ListChainsResponse);
@@ -21,7 +20,7 @@ message ListChainsResponse {
 }
 
 message ListAssetsRequest {
-  cpay.blockchain.v1.Chain chain = 1;
+  blockchain.ChainID chain = 1;
 }
 
 message ListAssetsResponse {
