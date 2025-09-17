@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package cpay.api.v1.kms;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/kms";
+
+service KeyManagementService {
+  rpc WrapKey(WrapKeyRequest) returns (WrapKeyResponse);
+  rpc UnwrapKey(UnwrapKeyRequest) returns (UnwrapKeyResponse);
+  rpc RewrapKey(RewrapKeyRequest) returns (RewrapKeyResponse);
+}
+
+message WrapKeyRequest {
+  bytes data = 1;
+  bytes transit_nonce = 2;
+}
+
+message WrapKeyResponse {
+  uint32 version = 1;
+  string encrypted_data = 2;
+}
+
+message UnwrapKeyRequest {
+  bytes data = 1;
+  bytes transit_nonce = 2;
+}
+
+message UnwrapKeyResponse {
+  uint32 version = 1;
+  string encrypted_data = 2;
+}
+
+message RewrapKeyRequest {
+  bytes data = 1;
+  bytes transit_nonce = 2;
+}
+
+message RewrapKeyResponse {
+  uint32 version = 1;
+  string encrypted_data = 2;
+}
