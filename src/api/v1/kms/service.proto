@@ -21,8 +21,9 @@ message WrapKeyResponse {
 }
 
 message UnwrapKeyRequest {
-  bytes data = 1;
-  bytes transit_nonce = 2;
+  uint32 version = 1;
+  bytes data = 2;
+  bytes transit_nonce = 3;
 }
 
 message UnwrapKeyResponse {
@@ -31,11 +32,12 @@ message UnwrapKeyResponse {
 }
 
 message RewrapKeyRequest {
-  bytes data = 1;
-  bytes transit_nonce = 2;
+  uint32 old_version = 1;
+  bytes data = 2;
+  bytes transit_nonce = 3;
 }
 
 message RewrapKeyResponse {
-  uint32 version = 1;
+  uint32 new_version = 1;
   string encrypted_data = 2;
 }
