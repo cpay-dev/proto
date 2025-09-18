@@ -17,7 +17,7 @@ message WrapKeyRequest {
 
 message WrapKeyResponse {
   uint32 version = 1;
-  string encrypted_data = 2;
+  bytes encrypted_data = 2;
 }
 
 message UnwrapKeyRequest {
@@ -27,7 +27,7 @@ message UnwrapKeyRequest {
 }
 
 message UnwrapKeyResponse {
-  string encrypted_data = 1;
+  bytes decrypted_data = 1;
 }
 
 message RewrapKeyRequest {
@@ -38,5 +38,5 @@ message RewrapKeyRequest {
 
 message RewrapKeyResponse {
   uint32 new_version = 1;
-  string encrypted_data = 2;
+  bytes encrypted_data = 2;
 }
