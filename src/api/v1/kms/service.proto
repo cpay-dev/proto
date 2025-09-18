@@ -27,8 +27,7 @@ message UnwrapKeyRequest {
 }
 
 message UnwrapKeyResponse {
-  uint32 version = 1;
-  string encrypted_data = 2;
+  string encrypted_data = 1;
 }
 
 message RewrapKeyRequest {
