@@ -12,7 +12,7 @@ service KeyManagementService {
 
 message WrapKeyRequest {
   bytes data = 1;
-  bytes transit_nonce = 2;
+  bytes transit_key = 2;
 }
 
 message WrapKeyResponse {
@@ -23,7 +23,7 @@ message WrapKeyResponse {
 message UnwrapKeyRequest {
   uint32 version = 1;
   bytes data = 2;
-  bytes transit_nonce = 3;
+  bytes transit_key = 3;
 }
 
 message UnwrapKeyResponse {
@@ -33,7 +33,7 @@ message UnwrapKeyResponse {
 message RewrapKeyRequest {
   uint32 old_version = 1;
   bytes data = 2;
-  bytes transit_nonce = 3;
+  bytes transit_key = 3;
 }
 
 message RewrapKeyResponse {

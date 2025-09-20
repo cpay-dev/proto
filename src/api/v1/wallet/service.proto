@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package cpay.api.v1.wallet;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/wallet";
+
+import "api/v1/blockchain/chain_id.proto";
+
+service WalletService {
+  rpc CreateWallet(CreateWalletRequest) returns (CreateWalletResponse);
+}
+
+message CreateWalletRequest {
+  blockchain.ChainID chain = 1;
+  bytes transit_key = 2;
+}
+
+message CreateWalletResponse {
+  uint32 kek_version = 1;
+  string encrypted_private_key = 2;
+  string public_key = 3;
+}
