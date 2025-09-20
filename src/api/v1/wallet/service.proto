@@ -17,6 +17,6 @@ message CreateWalletRequest {
 
 message CreateWalletResponse {
   uint32 kek_version = 1;
-  string encrypted_private_key = 2;
+  bytes encrypted_private_key = 2;
   string public_key = 3;
 }
