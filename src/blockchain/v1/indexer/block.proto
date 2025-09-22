@@ -17,8 +17,12 @@ enum ConfirmationLevel {
 }
 
 message Transaction {
+  string tx_hash = 1;
+}
+
+message Block {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
-  string tx_hash = 3;
-  uint64 block_number = 4;
+  uint64 block_number = 3;
+  repeated Transaction transactions = 4;
 }
