@@ -6,16 +6,20 @@ option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/indexer";
 
 import "blockchain/v1/indexer/types.proto";
 
-message Block {
+message ParsedBlock {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
   uint64 block_number = 3;
-  oneof transactions {
-    EVMTransactions evm_transactions = 4;
-  }
+  repeated ParsedTransfer transfers = 4;
 }
 
-message EVMTransactions {
-  bytes serialized_txs = 1;
-  bytes serialized_receipts = 2;
+message ParsedTransfer {
+  string tx_hash = 1;
+  string amount = 2;
+  string from = 3;
+  string to = 4;
+  oneof kind {
+    bool native = 5;
+    string contract = 6;
+  }
 }

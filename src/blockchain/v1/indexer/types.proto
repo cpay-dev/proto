@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package cpay.blockchain.v1.indexer;
+
+option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/indexer";
+
+enum Chain {
+  CHAIN_UNSPECIFIED = 0;
+  CHAIN_EVM = 1;
+}
+
+enum ConfirmationLevel {
+  CONFIRMATION_LEVEL_UNSPECIFIED = 0;
+  CONFIRMATION_LEVEL_PENDING = 1;
+  CONFIRMATION_LEVEL_SAFE = 2;
+  CONFIRMATION_LEVEL_FINALIZED = 3;
+}
