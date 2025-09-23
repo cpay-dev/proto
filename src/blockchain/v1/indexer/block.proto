@@ -21,7 +21,7 @@ message Block {
   ConfirmationLevel confirmation_level = 2;
   uint64 block_number = 3;
 
-  oneof transaction {
+  oneof transactions {
     bytes serialized_txs = 4;
   }
 }
