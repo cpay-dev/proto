@@ -20,8 +20,12 @@ message Block {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
   uint64 block_number = 3;
-
   oneof transactions {
-    bytes serialized_txs = 4;
+    EVMTransactions evm_transactions = 4;
   }
+}
+
+message EVMTransactions {
+  bytes serialized_txs = 1;
+  bytes serialized_receipts = 2;
 }
