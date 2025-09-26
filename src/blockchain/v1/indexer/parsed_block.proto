@@ -20,8 +20,9 @@ message ParsedTransfer {
   string amount = 2;
   string from = 3;
   string to = 4;
+  uint64 index = 5;
   oneof kind {
-    bool native = 5;
-    string contract = 6;
+    bool native = 6;
+    string contract = 7;
   }
 }
