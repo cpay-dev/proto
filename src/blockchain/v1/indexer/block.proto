@@ -10,8 +10,9 @@ message Block {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
   uint64 block_number = 3;
+  uint64 block_timestamp = 4;
   oneof transactions {
-    EVMTransactions evm_transactions = 4;
+    EVMTransactions evm_transactions = 5;
   }
 }
 
