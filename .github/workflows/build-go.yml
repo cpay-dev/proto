@@ -166,10 +166,10 @@ jobs:
           cat <<EOF > cmd/unit/main.go
           package main
 
-          import "github.com/cpay-dev/proto-go/api/v1/blockchain"
+          import "github.com/cpay-dev/proto-go/blockchain/v1"
 
           func main() {
-            _ = blockchain.ChainID_CHAIN_ID_ANY_BTC
+            _ = v1.Chain_CHAIN_ANY_EVM
           }
           EOF
           go build cmd/unit/main.go \
