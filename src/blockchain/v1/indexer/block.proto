@@ -9,10 +9,11 @@ import "blockchain/v1/indexer/types.proto";
 message Block {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
-  uint64 block_number = 3;
-  uint64 block_timestamp = 4;
+  string block_hash = 3;
+  uint64 block_number = 4;
+  uint64 block_timestamp = 5;
   oneof transactions {
-    EVMTransactions evm_transactions = 5;
+    EVMTransactions evm_transactions = 6;
   }
 }
 

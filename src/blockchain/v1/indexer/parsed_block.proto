@@ -9,9 +9,10 @@ import "blockchain/v1/indexer/types.proto";
 message ParsedBlock {
   Chain chain = 1;
   ConfirmationLevel confirmation_level = 2;
-  uint64 block_number = 3;
-  uint64 block_timestamp = 4;
-  repeated ParsedTransfer transfers = 5;
+  string block_hash = 3;
+  uint64 block_number = 4;
+  uint64 block_timestamp = 5;
+  repeated ParsedTransfer transfers = 6;
 }
 
 message ParsedTransfer {
