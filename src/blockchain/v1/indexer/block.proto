@@ -7,12 +7,16 @@ option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/indexer";
 import "blockchain/v1/block.proto";
 import "blockchain/v1/chain.proto";
 
-message Block {
+message BlockBase {
   cpay.blockchain.v1.Chain chain = 1;
   cpay.blockchain.v1.ConfirmationLevel confirmation_level = 2;
   string block_hash = 3;
   uint64 block_number = 4;
   uint64 block_timestamp = 5;
+}
+
+message Block {
+  BlockBase base = 1;
   oneof transactions {
     EVMTransactions evm_transactions = 6;
   }
