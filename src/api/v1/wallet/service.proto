@@ -4,14 +4,14 @@ package cpay.api.v1.wallet;
 
 option go_package = "github.com/cpay-dev/proto-go/api/v1/wallet";
 
-import "api/v1/blockchain/chain_id.proto";
+import "blockchain/v1/chain.proto";
 
 service WalletService {
   rpc CreateWallet(CreateWalletRequest) returns (CreateWalletResponse);
 }
 
 message CreateWalletRequest {
-  blockchain.ChainID chain = 1;
+  cpay.blockchain.v1.Chain chain = 1;
   bytes transit_key = 2;
 }
 

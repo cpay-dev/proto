@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package cpay.api.v1.merchant;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
+
+import "blockchain/v1/chain.proto";
+
+message Asset {
+  string id = 1;
+  cpay.blockchain.v1.Chain chain = 2;
+  string name = 3;
+  string symbol = 4;
+  AssetMetadata metadata = 5;
+}
+
+message AssetMetadata {
+  string address = 1;
+  uint32 decimals = 2;
+}
