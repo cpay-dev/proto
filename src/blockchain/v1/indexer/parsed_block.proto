@@ -4,11 +4,11 @@ package cpay.blockchain.v1.indexer;
 
 option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/indexer";
 
-import "blockchain/v1/indexer/types.proto";
+import "blockchain/v1/block.proto";
 
 message ParsedBlock {
   Chain chain = 1;
-  ConfirmationLevel confirmation_level = 2;
+  cpay.blockchain.v1.ConfirmationLevel confirmation_level = 2;
   string block_hash = 3;
   uint64 block_number = 4;
   uint64 block_timestamp = 5;
