@@ -6,23 +6,11 @@ option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
 
 import "api/v1/merchant/asset.proto";
 import "api/v1/merchant/chain.proto";
+import "api/v1/merchant/payment-intent.proto";
 import "blockchain/v1/chain.proto";
 
 service MerchantService {
   rpc ListChains(ListChainsRequest) returns (ListChainsResponse);
   rpc ListAssets(ListAssetsRequest) returns (ListAssetsResponse);
-}
-
-message ListChainsRequest {}
-
-message ListChainsResponse {
-  repeated Chain chains = 1;
-}
-
-message ListAssetsRequest {
-  cpay.blockchain.v1.Chain chain_id = 1;
-}
-
-message ListAssetsResponse {
-  repeated Asset assets = 1;
+  rpc CreatePaymentIntent(CreatePaymentIntentRequest) returns (CreatePaymentIntentResponse);
 }

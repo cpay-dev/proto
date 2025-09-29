@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package cpay.api.v1.merchant;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
+
+import "api/v1/merchant/asset.proto";
+import "api/v1/merchant/chain.proto";
+import "blockchain/v1/chain.proto";
+import "google/protobuf/timestamp.proto";
+
+enum PaymentIntentStatus {
+  PAYMENT_INTENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_INTENT_STATUS_AWAITING_PAYMENT = 1;
+  PAYMENT_INTENT_STATUS_PAID = 2;
+  PAYMENT_INTENT_STATUS_EXPIRED = 3;
+  PAYMENT_INTENT_STATUS_AML_CHECK_PENDING = 4;
+  PAYMENT_INTENT_STATUS_AML_CHECK_FAILED = 5;
+  PAYMENT_INTENT_STATUS_REFUND_PENDING = 6;
+  PAYMENT_INTENT_STATUS_REFUNDED = 7;
+}
+
+message PaymentIntent {
+  string id = 1;
+  PaymentIntentStatus status = 2;
+  string asset_id = 3;
+  string amount_usd = 4;
+  string amount_asset = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message CreatePaymentIntentRequest {
+  string asset_id = 1;
+  string amount = 2;
+}
+
+message CreatePaymentIntentResponse {
+  PaymentIntent payment_intent = 1;
+}
