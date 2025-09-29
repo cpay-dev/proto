@@ -17,12 +17,5 @@ message Asset {
 message AssetMetadata {
   string address = 1;
   uint32 decimals = 2;
-}
-
-message ListAssetsRequest {
-  cpay.blockchain.v1.Chain chain_id = 1;
-}
-
-message ListAssetsResponse {
-  repeated Asset assets = 1;
+  bool is_stable = 3;
 }

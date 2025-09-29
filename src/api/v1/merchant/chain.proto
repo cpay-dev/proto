@@ -10,9 +10,3 @@ message Chain {
   cpay.blockchain.v1.Chain id = 1;
   string name = 2;
 }
-
-message ListChainsRequest {}
-
-message ListChainsResponse {
-  repeated Chain chains = 1;
-}
