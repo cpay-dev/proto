@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package cpay.api.v1.merchant;
+package cpay.api.v1.merchant.asset;
 
-option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant";
+option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant/asset";
 
-import "api/v1/merchant/asset.proto";
+import "api/v1/merchant/asset/asset.proto";
 import "blockchain/v1/chain.proto";
 
 service AssetService {

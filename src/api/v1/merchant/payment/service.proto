@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package cpay.api.v1.merchant.payment;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/merchant/payment";
+
+import "api/v1/merchant/payment/intent.proto";
+
+service PaymentService {
+  rpc CreateIntent(CreateIntentRequest) returns (CreateIntentResponse);
+  rpc GetIntent(GetIntentRequest) returns (GetIntentResponse);
+}
+
+message CreateIntentRequest {
+  string asset_id = 1;
+  oneof amount {
+    string amount_usd = 2;
+    string amount_asset = 3;
+  }
+}
+
+message CreateIntentResponse {
+  Intent intent = 1;
+}
+
+message GetIntentRequest {
+  string id = 1;
+}
+
+message GetIntentResponse {
+  Intent intent = 1;
+}
