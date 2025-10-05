@@ -12,7 +12,6 @@ service WalletService {
 
 message CreateWalletRequest {
   cpay.blockchain.v1.Chain chain = 1;
-  bytes transit_key = 2;
 }
 
 message CreateWalletResponse {
