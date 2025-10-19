@@ -4,9 +4,19 @@ package cpay.blockchain.v1;
 
 option go_package = "github.com/cpay-dev/proto-go/blockchain/v1";
 
+import "blockchain/v1/chain.proto";
+
 enum ConfirmationLevel {
   CONFIRMATION_LEVEL_UNSPECIFIED = 0;
   CONFIRMATION_LEVEL_PENDING = 1;
   CONFIRMATION_LEVEL_SAFE = 2;
   CONFIRMATION_LEVEL_FINALIZED = 3;
+}
+
+message Block {
+  Chain chain = 1;
+  ConfirmationLevel confirmation_level = 2;
+  string block_hash = 3;
+  uint64 block_number = 4;
+  uint64 block_timestamp = 5;
 }

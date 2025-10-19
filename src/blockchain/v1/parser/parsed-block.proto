@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package cpay.blockchain.v1.indexer;
+package cpay.blockchain.v1.parser;
 
-option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/indexer";
+option go_package = "github.com/cpay-dev/proto-go/blockchain/v1/parser";
 
-import "blockchain/v1/indexer/block.proto";
+import "blockchain/v1/block.proto";
 
 message ParsedBlock {
-  BlockBase block = 1;
+  cpay.blockchain.v1.Block info = 1;
   repeated ParsedTransfer transfers = 2;
 }
 
