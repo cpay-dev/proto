@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package cpay.api.v1.authn;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/authn";
+
+import "api/v1/authn/init_auth.proto";
+
+service AuthnService {
+  rpc InitAuth(InitAuthRequest) returns (InitAuthResponse);
+}
