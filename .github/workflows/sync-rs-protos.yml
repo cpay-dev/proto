@@ -1,4 +1,4 @@
-name: Sync Go protos to proto-go
+name: Sync Rust protos to proto-rs
 
 on:
   push:
@@ -10,9 +10,6 @@ permissions:
 
 env:
   PROTOC_VERSION: "33.0"
-  PROTOC_BIN_VERSION: "v1.36.10"
-  GRPC_BIN_VERSION: "v1.5.1"
-  GOBIN: "${{ github.workspace }}/.cache/go-tools/bin"
 
 jobs:
   publish:
@@ -21,11 +18,18 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ macos-15, ubuntu-24.04, ubuntu-24.04-arm ]
-        go-version: [ '1.25.3' ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Checkout proto-rs
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          token: ${{ secrets.PROTO_RS_PUB_WRITE_TOKEN }}
+          repository: 'cpay-dev/proto-rs'
+          ref: 'authn'
+          path: 'proto-rs'
 
       - name: Compute protoc archive name
         id: protoc-arch
@@ -87,94 +91,20 @@ jobs:
           protoc --version
           test -d "$PROTOC_INCLUDE"
 
-      - name: Cache Go toolchain
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ${{ runner.tool_cache }}/go/${{ matrix.go-version }}
-          key: go-toolchain-${{ runner.os }}-${{ runner.arch }}-${{ matrix.go-version }}
-
-      - name: Setup go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
-        with:
-          go-version: ${{ matrix.go-version }}
-          cache: false
-
-      - name: Add go bin to PATH
-        run: |
-          set -eu
-          mkdir -p "$GOBIN"
-          echo "$GOBIN" >> "$GITHUB_PATH"
-
-      - name: Cache go binaries
-        id: cache-go-bin
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ${{ env.GOBIN }}
-          key: ${{ runner.os }}-${{ runner.arch }}-go-${{ matrix.go-version }}-${{ env.PROTOC_BIN_VERSION }}-${{ env.GRPC_BIN_VERSION }}
-
-      - name: Install go binaries (cache miss)
-        if: steps.cache-go-bin.outputs.cache-hit != 'true'
-        run: |
-          set -eu
-          go install "google.golang.org/protobuf/cmd/protoc-gen-go@${{ env.PROTOC_BIN_VERSION }}"
-          go install "google.golang.org/grpc/cmd/protoc-gen-go-grpc@${{ env.GRPC_BIN_VERSION }}"
-
-      - name: Verify go binaries
-        run: |
-          set -eu
-          protoc-gen-go --version
-          protoc-gen-go-grpc --version
-
       - name: Build sources
+        working-directory: 'proto-rs'
         run: |
           set -eu
-          mkdir build
 
-          find src -type f -name '*.proto' \
-          -exec protoc \
-          -I src \
-          --go_out=./build \
-          --go_opt=paths=source_relative \
-          --go-grpc_out=./build \
-          --go-grpc_opt=paths=source_relative {} \;
+          find crates/proto/src -type f ! -name 'lib.rs' -delete
+          export PROTO_SRC_DIR="${{ github.workspace }}/src"
+          cargo r -p proto-build
 
-      - name: Checkout proto-go
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          token: ${{ secrets.PROTO_GO_PUB_WRITE_TOKEN }}
-          repository: 'cpay-dev/proto-go'
-          ref: 'authn'
-          path: 'proto-go'
-
-      - name: Sync sources
+      - name: Validate Rust library builds
+        working-directory: 'proto-rs'
         run: |
           set -eu
-          test -d build || { echo "build dir not found"; exit 1; }
-          find 'proto-go' -mindepth 1 -maxdepth 1 \
-            ! -name 'go.mod' \
-            ! -name 'go.sum' \
-            ! -name '.*' \
-            -exec rm -rf {} +
-          cp -r ./build/* proto-go/
-
-      - name: Validate Go library builds
-        working-directory: 'proto-go'
-        run: |
-          set -eu
-          go mod tidy
-          go mod verify
-          mkdir -p cmd/unit
-          cat <<EOF > cmd/unit/main.go
-          package main
-
-          import _ "github.com/cpay-dev/proto-go/api/v1/authn"
-
-          func main() {}
-          EOF
-          go build -o unit cmd/unit/main.go \
-            && ./unit \
-            && rm ./unit \
-            && rm -r cmd
+          cargo b -p cpay-proto
 
       - name: Install SSH signing key
         if: ${{ matrix.os == 'macos-15' }}
@@ -185,9 +115,9 @@ jobs:
           printf '%s\n' "${SIGNING_KEY}" > "$HOME/.ssh/github-signing"
           chmod 600 "$HOME/.ssh/github-signing"
 
-      - name: Commit and push to proto-go
+      - name: Commit and push to proto-rs
         if: ${{ matrix.os == 'macos-15' }}
-        working-directory: 'proto-go'
+        working-directory: 'proto-rs'
         env:
           BRANCH: "authn"
         run: |
