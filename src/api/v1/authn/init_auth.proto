@@ -23,6 +23,11 @@ message EmailMethod {
 
 message InitAuthResponse {
   oneof continuation {
-    string auth_url = 1;
+    ProviderContinuation provider = 1;
   }
+}
+
+message ProviderContinuation {
+  string state = 1;
+  string redirect_url = 2;
 }
