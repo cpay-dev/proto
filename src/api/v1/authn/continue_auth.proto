@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package cpay.api.v1.authn;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/authn";
+
+message ContinueAuthRequest {
+  oneof method {
+    ProviderCallbackMethod provider_callback = 1;
+  }
+}
+
+message ProviderCallbackMethod {
+  string state = 1;
+  string code = 2;
+}
+
+message ContinueAuthResponse {
+  oneof data {
+    ProviderCallbackData provider_data = 1;
+  }
+}
+
+message ProviderCallbackData {
+  string email = 1;
+  bool email_verified = 2;
+}
