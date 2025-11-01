@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package cpay.api.v1.user;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/user";
+
+import "api/v1/authn/provider.proto";
+import "api/v1/user/user.proto";
+
+message GetUserProfileRequest {
+  cpay.api.v1.authn.AuthProvider provider = 1;
+  string identifier = 2;
+}
+
+message GetUserProfileResponse {
+  UserProfile profile = 1;
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package cpay.api.v1.user;
+
+option go_package = "github.com/cpay-dev/proto-go/api/v1/user";
+
+import "google/protobuf/timestamp.proto";
+
+enum MerchantStatus {
+  MERCHANT_STATUS_UNSPECIFIED = 0;
+  MERCHANT_STATUS_PENDING_VERIFICATION = 1;
+  MERCHANT_STATUS_ACTIVE = 2;
+  MERCHANT_STATUS_INACTIVE = 3;
+}
+
+message Merchant {
+  string id = 1;
+  MerchantStatus status = 2;
+  string name = 3;
+  string email = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
